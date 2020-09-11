@@ -20,6 +20,8 @@ export class DashboardComponent implements AfterViewInit {
   public Rangos:RangoEdades[]=[]
   public Casos:string='0';
   public RangosLabel=[];
+  public RangosEdades=['0-05','06-15','16-20','21-30','31-40','41-50','51-60','61-70','71-80','81-90','91-100'];
+  public RangosBool=[true,true,false,true,true,true,true,true,true,true,true]
   public canvas : any;
   public ctx;
   public datasets: any;
@@ -35,13 +37,14 @@ export class DashboardComponent implements AfterViewInit {
   public myChartCardiovascular;
   public ChartDefunciones;
   public MyChartRangoEdades;
+  public myChartEmbarazo;
   public OptionsPie=[ 'SI', 'NO','SE IGNORA'];
   //public pies=["CountryChart"];
    public pies=["Diabeticos","Hipertensos","Con EPOC","Asmaticos","Obesos","Tabaquismo",
-   "Enfermedades Renal Cronica","Cardiacas"];
-   public PiesBool=[{'SI':false, 'NO':true,'SE IGNORA':true},{'SI':true, 'NO':true,'SE IGNORA':true},{'SI':true, 'NO':true,'SE IGNORA':true},
+   "Enfermedades Renal Cronica","Cardiacas","Embarazo"];
+   public PiesBool=[{'SI':true, 'NO':true,'SE IGNORA':true},{'SI':true, 'NO':true,'SE IGNORA':true},{'SI':true, 'NO':true,'SE IGNORA':true},
    {'SI':true, 'NO':true,'SE IGNORA':true},{'SI':true, 'NO':true,'SE IGNORA':true},{'SI':true, 'NO':true,'SE IGNORA':true},
-   {'SI':true, 'NO':true,'SE IGNORA':true},{'SI':true, 'NO':true,'SE IGNORA':true}]
+   {'SI':true, 'NO':true,'SE IGNORA':true},{'SI':true, 'NO':true,'SE IGNORA':true},{'SI':true, 'NO':true,'SE IGNORA':true}]
   public clicked: boolean = true;
   public clicked1: boolean = false;
   public clicked2: boolean = false;
@@ -54,27 +57,30 @@ export class DashboardComponent implements AfterViewInit {
   tabaquismo=[0,1,2];
   renal_cronica=[0,1,2];
   cardiovascular=[0,1,2];
+  Embarazos=[0,1,2];
   PiechartColors=['rgba(29,140,248,0.2)','rgba(233,32,16,0.2)','rgba(66,134,121,0.15)']
   fallecidos:Fallecidos[]=[];
-  public QueryDiabetes='';
-  public QueryRangos='';
+  public Querys=['','','','','','','','','','',''];
   public QueryFallecidos='&q=NOT+%23null(fecha_def)';
   public Redefinir={
-    Diabeticos:'diabetes',
-    Hipertensos:'hipertension',
+    "Diabeticos":'diabetes',
+    "Hipertensos":'hipertension',
     "Con EPOC":'epoc',
     "Asmaticos":"asma",
     "Obesos":'obesidad',
     "Tabaquismo":'tabaquismo',
    "Enfermedades Renal Cronica":"renal_cronica",
-   "Cardiacas":"cardiovascular"
+   "Cardiacas":"cardiovascular",
+   "Embarazo":"embarazo"
       }
+  public muertos:string='0';
+  public PorcentajeFallecidos:Number;
   
   constructor(private ReadApi:ReadApiService) {}
 
   ngAfterViewInit() {
 
-    console.log(this.PiesBool[0]["SI"]);
+    
     this.checando1('');
     var gradientChartOptionsConfigurationWithTooltipBlue: any = {
       maintainAspectRatio: false,
@@ -324,37 +330,6 @@ export class DashboardComponent implements AfterViewInit {
         display: true,
         position:'bottom',
         labels:{usePointStyle:true},
-         onClick: function(e, legendItem) {
-          var index = legendItem.index;
-          var chart = this.chart;
-          var i, ilen, meta;
-          for (i = 0, ilen = (chart.data.datasets || []).length; i < ilen; ++i) {
-            meta = chart.getDatasetMeta(i);
-          }
-          if(meta.data[(legendItem.index+1)%3].hidden && !meta.data[legendItem.index].hidden){
-            meta.data[0].hidden=false;
-            meta.data[1].hidden=false;
-            meta.data[2].hidden=false;
-            this.QueryDiabetes=''
-            //refine.diabetes=SI
-          } else {
-            this.QueryDiabetes='&refine.diabetes='+legendItem.text;
-            console.log(this.QueryDiabetes);
-           for(let label1 of meta.data){
-             if (legendItem.index!=label1._index) {
-             label1.hidden=true;
-             } else {
-               label1.hidden=false;
-             }
-          }
-        }
-        //Chart.defaults.pie.legend.onClick.call(this.checando1(this.QueryDiabetes));
-        //this.checando1(this.QueryDiabetes);
-  
-           chart.update();
-
-          
-        }
         },
         
 
@@ -372,7 +347,8 @@ export class DashboardComponent implements AfterViewInit {
       scales: {
         yAxes: false,
         xAxes:false,
-      }
+      },
+      
     };
 
 
@@ -580,14 +556,20 @@ this.ChartDefunciones = new Chart(this.ctx, {
     //Cardiovascular
     this.canvas = document.getElementById(this.pies[7]);
     this.ctx  = this.canvas.getContext("2d");
-    this.myChartCardiovascular=this.CreateChartPie(this.cardiovascular,gradientPieChartConfiguration)
+    this.myChartCardiovascular=this.CreateChartPie(this.cardiovascular,gradientPieChartConfiguration);
+
+     //Embaraos
+     this.canvas = document.getElementById(this.pies[8]);
+     //console.log(this.pies[8])
+     this.ctx  = this.canvas.getContext("2d");
+     this.myChartEmbarazo=this.CreateChartPie(this.Embarazos,gradientPieChartConfiguration)
 
   }
 
 
   
   public checando1(query){
-    
+    var casos:number;
     //var diabeticos=0;
     //var Data=[];
     this.ReadApi.LeerDatos(query)
@@ -596,30 +578,59 @@ this.ChartDefunciones = new Chart(this.ctx, {
         this.prueba=res;
         console.log(res);
         this.Casos=this.numberWithCommas(this.prueba.nhits);
+        casos=+this.prueba.nhits;
         //console.log(this.prueba.nhits);
+        for(let faseset of this.prueba.facet_groups){
+          if(faseset.name=="diabetes"){
+            this.Basesde3(this.diabeticos,faseset.facets);
+          } else if(faseset.name=="hipertension"){
+            this.Basesde3(this.hipertensos,faseset.facets);
+          } else if(faseset.name=="epoc"){
+            this.Basesde3(this.epoc,faseset.facets);
+          } else if(faseset.name=="asma"){
+            this.Basesde3(this.asma,faseset.facets);
+          } else if(faseset.name=="obesidad"){
+            this.Basesde3(this.obesidad,faseset.facets);
+          } else if(faseset.name=="tabaquismo"){
+            this.Basesde3(this.tabaquismo,faseset.facets);
+          } else if(faseset.name=="renal_cronica"){
+            this.Basesde3(this.renal_cronica,faseset.facets);
+          } else if(faseset.name=="cardiovascular"){
+            this.Basesde3(this.cardiovascular,faseset.facets);
+          } else if(faseset.name=="embarazo"){
+            this.Basesde3(this.Embarazos,faseset.facets);
+          } else if(faseset.name=="fecha_def"){
+            this.fallecidos=[];
+            for(let fechas of faseset.facets){
+                this.fallecidos.push(<Fallecidos>{Fecha:this.parseDate(fechas.name),Confirmados:fechas.count})
+                //console.log(fechas.name);
+            }
+          } else if(faseset.name=="rango_edad"){
+            this.Rangos=[];
+            for(let rango of faseset.facets){
+              this.Rangos.push(<RangoEdades>{Rango:rango.path,RangoNum:this.parseDate(rango.path,false),Casos:rango.count})
+              //console.log(fechas.name);
+          }
+            this.Rangos.sort((a:RangoEdades,b:RangoEdades)=> {return a.RangoNum -b.RangoNum});
+            if(this.RangosLabel.length==0){
+              this.RangosLabel=this.Rangos.map(t=>t.Rango)
+            }
+          }
+          
+        }
+        //this.Basesde3(this.epoc,this.prueba.facet_groups[8].facets);        
+        //this.Basesde3(this.asma,this.prueba.facet_groups[9].facets);
+        //this.Basesde3(this.obesidad,this.prueba.facet_groups[10].facets);
+        //this.Basesde3(this.tabaquismo,this.prueba.facet_groups[11].facets);
+        //this.Basesde3(this.renal_cronica,this.prueba.facet_groups[14].facets);
+        //this.Basesde3(this.cardiovascular,this.prueba.facet_groups[16].facets);        
+        //this.Basesde3(this.Embarazos,this.prueba.facet_groups[4].facets);        
+        // this.fallecidos=[];
+        // for(let fechas of this.prueba.facet_groups[12].facets){
+        //     this.fallecidos.push(<Fallecidos>{Fecha:this.parseDate(fechas.name),Confirmados:fechas.count})
+        //     //console.log(fechas.name);
+        // }
 
-        this.Basesde3(this.diabeticos,this.prueba.facet_groups[6].facets);
-        this.Basesde3(this.hipertensos,this.prueba.facet_groups[2].facets);
-        this.Basesde3(this.epoc,this.prueba.facet_groups[8].facets);        
-        this.Basesde3(this.asma,this.prueba.facet_groups[9].facets);
-        this.Basesde3(this.obesidad,this.prueba.facet_groups[10].facets);
-        this.Basesde3(this.tabaquismo,this.prueba.facet_groups[11].facets);
-        this.Basesde3(this.renal_cronica,this.prueba.facet_groups[14].facets);
-        this.Basesde3(this.cardiovascular,this.prueba.facet_groups[16].facets);        
-        this.fallecidos=[];
-        for(let fechas of this.prueba.facet_groups[12].facets){
-            this.fallecidos.push(<Fallecidos>{Fecha:this.parseDate(fechas.name),Confirmados:fechas.count})
-            //console.log(fechas.name);
-        }
-        this.Rangos=[];
-        for(let rango of this.prueba.facet_groups[3].facets){
-          this.Rangos.push(<RangoEdades>{Rango:rango.path,RangoNum:this.parseDate(rango.path,false),Casos:rango.count})
-          //console.log(fechas.name);
-      }
-        this.Rangos.sort((a:RangoEdades,b:RangoEdades)=> {return a.RangoNum -b.RangoNum});
-        if(this.RangosLabel.length==0){
-          this.RangosLabel=this.Rangos.map(t=>t.Rango)
-        }
 
        
         this.fallecidos.sort((a: Fallecidos, b: Fallecidos) => {
@@ -631,6 +642,18 @@ this.ChartDefunciones = new Chart(this.ctx, {
             },
       err=>{console.log(err);}
     )
+
+    var prueba1;
+    this.ReadApi.LeerFallecidos(query)
+    .subscribe(
+      
+      res=>{
+        prueba1=res;
+        this.muertos=prueba1.nhits;
+        this.PorcentajeFallecidos=(+this.muertos/casos);
+      }
+      
+    )
     //console.log(diabeticos);
     //console.log(Data);
   }
@@ -640,6 +663,7 @@ this.ChartDefunciones = new Chart(this.ctx, {
     this.myChartData.update();
   }
   public updateOptionsdiabetes() {
+    console.log(this.hipertensos);
     this.myChartDiabetes.update();
     this.myChartHipertensos.update();
     this.myChartEpoc.update();
@@ -648,12 +672,14 @@ this.ChartDefunciones = new Chart(this.ctx, {
     this.myChartTabaquismo.update();
     this.myChartRenal.update();
     this.myChartCardiovascular.update();
+
     this.ChartDefunciones.data.labels=this.fallecidos.map(t=>t.Fecha);
     this.ChartDefunciones.data.datasets[0].data=this.fallecidos.map(t=>t.Confirmados);
     this.ChartDefunciones.update();
     this.MyChartRangoEdades.data.labels=this.Rangos.map(t=>t.Rango);
     this.MyChartRangoEdades.data.datasets[0].data=this.Rangos.map(t=>t.Casos);
     this.MyChartRangoEdades.update();
+    this.myChartEmbarazo.update();
     
   }
   public parseDate(input,EsFecha=true) {
@@ -690,16 +716,30 @@ for(let item of fset){
     base[0]=item.count;
   } else if(item.name=="NO"){
     base[1]=item.count;
-  } else {
+  } else if(item.name=="SE IGNORA"){
     base[2]=item.count;
   }
 }
 }
-public PiesEstatus(Opciones,Optpick,ValOpt){
-Opciones['SI']=false;
-Opciones['NO']=false;
-Opciones['SE IGNORA']=false;
-Opciones[Optpick]=true;
+public PiesEstatus(Opciones,Optpick,ValOpt,numero){
+  if(Opciones['SI']+Opciones['NO']+Opciones['SE IGNORA']==1 && ValOpt){
+    Opciones['SI']=true;
+Opciones['NO']=true;
+Opciones['SE IGNORA']=true;
+this.Querys[numero]='';
+//this.checando1('');
+  } else {
+    Opciones['SI']=false;
+    Opciones['NO']=false;
+    Opciones['SE IGNORA']=false;
+    Opciones[Optpick]=true;
+    this.Querys[numero]='&refine.'+this.Redefinir[this.pies[numero]]+'='+Optpick;
+    //this.checando1('&refine.'+this.Redefinir[this.pies[numero]]+'='+Optpick);
+  }
+  this.checando1(this.UnirQuerys(this.Querys))
+  //console.log(this.UnirQuerys(this.Querys));
+console.log(Opciones.map());
+
   // if(ValOpt){
 
 // }
@@ -707,5 +747,29 @@ Opciones[Optpick]=true;
 public numberWithCommas(x) {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
-
+public UnirQuerys(Querys){
+  var cadena:string='';
+  for(let Quer of Querys){
+    cadena=cadena+Quer;
+  }
+  return cadena;
+}
+public FiltrarRangos(opcion,valor,numero){
+  //console.log(this.RangosBool);
+  if(this.RangosBool[0] && this.RangosBool[1] || !valor){
+    this.Querys[10]='&refine.rango_edad='+opcion
+    for(var i = 0; i < 11; i++){
+      this.RangosBool[i]=false;
+    }
+    this.RangosBool[numero]=true;
+  } else {
+    this.Querys[10]=''
+    for(var i = 0; i < 11; i++){
+      this.RangosBool[i]=true;
+    }
+  }
+  this.checando1(this.UnirQuerys(this.Querys))
+  //console.log(this.RangosBool);
+  console.log(opcion.map());
+}
 }

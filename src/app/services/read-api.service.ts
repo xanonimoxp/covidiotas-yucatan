@@ -18,9 +18,11 @@ export class ReadApiService {
 
    LeerDatos(query){
      return this.httpClient.get(`${this.Uri}${query}`);
-     
-     
    }
+
+   LeerFallecidos(query){
+    return this.httpClient.get(`${this.UriFallecidos}${query}`);
+  }
    LeerDatos2(){
      this.httpClient.get(this.Uri)
      .subscribe(
