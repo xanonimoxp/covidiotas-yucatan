@@ -606,7 +606,7 @@ this.ChartDefunciones = new Chart(this.ctx, {
     .subscribe(
       res=>{
         this.prueba=res;
-        console.log(res);
+        //console.log(res);
         this.Casos=this.numberWithCommas(this.prueba.nhits);
         casos=+this.prueba.nhits;
         //console.log(this.prueba.nhits);
@@ -711,7 +711,7 @@ this.ChartDefunciones = new Chart(this.ctx, {
   public updateOptionsdiabetes() {
     //console.log(this.hipertensos);
     this.myChartDiabetes.update();
-    console.log(this.hipertensos);
+    //console.log(this.hipertensos);
     this.myChartHipertensos.update();
     this.myChartEpoc.update();
     this.myChartAsma.update();
@@ -869,6 +869,7 @@ this.ValorACero(this.cardiovascular);
 this.ValorACero(this.Embarazos);
 this.ValorACero(this.Sexo);
 this.ValorACero(this.Pacientes);
+this.fallecidos=[];
 
 }
 public ValorACero(valores){
