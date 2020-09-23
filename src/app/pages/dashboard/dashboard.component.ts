@@ -21,7 +21,7 @@ export class DashboardComponent implements AfterViewInit {
   public Casos:string='0';
   public RangosLabel=[];
   public RangosEdades=['0-05','06-15','16-20','21-30','31-40','41-50','51-60','61-70','71-80','81-90','91-100'];
-  public RangosBool=[true,true,false,true,true,true,true,true,true,true,true]
+  public RangosBool=[true,true,true,true,true,true,true,true,true,true,true]
   public canvas : any;
   public ctx;
   public datasets: any;
@@ -38,7 +38,13 @@ export class DashboardComponent implements AfterViewInit {
   public ChartDefunciones;
   public MyChartRangoEdades;
   public myChartEmbarazo;
+  public myChartSexo;
+  public myChartPaciente;
   public OptionsPie=[ 'SI', 'NO','SE IGNORA'];
+  public Generos=['HOMBRE','MUJER'];
+  public GenerosBool=[true,true];
+  public TipoPaciente=['AMBULATORIO','HOSPITALIZADO'];
+  public TipoPacienteBool=[true,true];
   //public pies=["CountryChart"];
    public pies=["Diabeticos","Hipertensos","Con EPOC","Asmaticos","Obesos","Tabaquismo",
    "Enfermedades Renal Cronica","Cardiacas","Embarazo"];
@@ -58,9 +64,11 @@ export class DashboardComponent implements AfterViewInit {
   renal_cronica=[0,1,2];
   cardiovascular=[0,1,2];
   Embarazos=[0,1,2];
+  Sexo=[1,2];
+  Pacientes=[100,80];
   PiechartColors=['rgba(29,140,248,0.2)','rgba(233,32,16,0.2)','rgba(66,134,121,0.15)']
   fallecidos:Fallecidos[]=[];
-  public Querys=['','','','','','','','','','',''];
+  public Querys=['','','','','','','','','','','','',''];
   public QueryFallecidos='&q=NOT+%23null(fecha_def)';
   public Redefinir={
     "Diabeticos":'diabetes',
@@ -388,45 +396,66 @@ export class DashboardComponent implements AfterViewInit {
       options: gradientChartOptionsConfigurationWithTooltipRed
     });
 
-////aqui checando jajaja
-    this.canvas = document.getElementById("chartLineGreen");
+    //SEXO
+  this.canvas = document.getElementById("ChartSexo");
     this.ctx = this.canvas.getContext("2d");
-
-
-    var gradientStroke = this.ctx.createLinearGradient(0, 230, 0, 50);
-
-    gradientStroke.addColorStop(1, 'rgba(66,134,121,0.15)');
-    gradientStroke.addColorStop(0.4, 'rgba(66,134,121,0.0)'); //green colors
-    gradientStroke.addColorStop(0, 'rgba(66,134,121,0)'); //green colors
-
     var data = {
-      labels: ['JUL', 'AUG', 'SEP', 'OCT', 'NOV'],
+      labels: ['Hombres','Mujeres'],
       datasets: [{
-        label: "My First dataset",
+        label: "Data",
         fill: true,
         backgroundColor: gradientStroke,
-        borderColor: '#00d6b4',
+        borderColor: '#ec250d',
         borderWidth: 2,
         borderDash: [],
         borderDashOffset: 0.0,
-        pointBackgroundColor: '#00d6b4',
+        pointBackgroundColor: '#ec250d',
         pointBorderColor: 'rgba(255,255,255,0)',
-        pointHoverBackgroundColor: '#00d6b4',
+        pointHoverBackgroundColor: '#ec250d',
         pointBorderWidth: 20,
         pointHoverRadius: 4,
         pointHoverBorderWidth: 15,
         pointRadius: 4,
-        data: [90, 27, 60, 12, 80],
+        data: this.Sexo,
       }]
     };
 
-    var myChart = new Chart(this.ctx, {
-      type: 'line',
+    this.myChartSexo = new Chart(this.ctx, {
+      type: 'bar',
       data: data,
-      options: gradientChartOptionsConfigurationWithTooltipGreen
-
+      options: gradientChartOptionsConfigurationWithTooltipRed
     });
-///aqui termina el original
+//pacientes
+this.canvas = document.getElementById("ChartPacientes");
+    this.ctx = this.canvas.getContext("2d");
+    var data = {
+      labels: ['Ambulatorio','Hospitalario'],
+      datasets: [{
+        label: "Data",
+        fill: true,
+        backgroundColor: gradientStroke,
+        borderColor: '#ec250d',
+        borderWidth: 2,
+        borderDash: [],
+        borderDashOffset: 0.0,
+        pointBackgroundColor: '#ec250d',
+        pointBorderColor: 'rgba(255,255,255,0)',
+        pointHoverBackgroundColor: '#ec250d',
+        pointBorderWidth: 20,
+        pointHoverRadius: 4,
+        pointHoverBorderWidth: 15,
+        pointRadius: 4,
+        data: this.Pacientes,
+      }]
+    };
+
+    this.myChartPaciente = new Chart(this.ctx, {
+      type: 'bar',
+      data: data,
+      options: gradientChartOptionsConfigurationWithTooltipRed
+    });
+
+
 this.canvas = document.getElementById("chartLineGreen1");
 this.ctx = this.canvas.getContext("2d");
 
@@ -474,40 +503,40 @@ this.ChartDefunciones = new Chart(this.ctx, {
 
 
 
-    this.canvas = document.getElementById("chartBig1");
-    this.ctx = this.canvas.getContext("2d");
+    // this.canvas = document.getElementById("chartBig1");
+    // this.ctx = this.canvas.getContext("2d");
 
-    var gradientStroke = this.ctx.createLinearGradient(0, 230, 0, 50);
+    // var gradientStroke = this.ctx.createLinearGradient(0, 230, 0, 50);
 
-    gradientStroke.addColorStop(1, 'rgba(233,32,16,0.2)');
-    gradientStroke.addColorStop(0.4, 'rgba(233,32,16,0.0)');
-    gradientStroke.addColorStop(0, 'rgba(233,32,16,0)'); //red colors
+    // gradientStroke.addColorStop(1, 'rgba(233,32,16,0.2)');
+    // gradientStroke.addColorStop(0.4, 'rgba(233,32,16,0.0)');
+    // gradientStroke.addColorStop(0, 'rgba(233,32,16,0)'); //red colors
 
-    var config = {
-      type: 'line',
-      data: {
-        labels: chart_labels,
-        datasets: [{
-          label: "My First dataset",
-          fill: true,
-          backgroundColor: gradientStroke,
-          borderColor: '#ec250d',
-          borderWidth: 2,
-          borderDash: [],
-          borderDashOffset: 0.0,
-          pointBackgroundColor: '#ec250d',
-          pointBorderColor: 'rgba(255,255,255,0)',
-          pointHoverBackgroundColor: '#ec250d',
-          pointBorderWidth: 20,
-          pointHoverRadius: 4,
-          pointHoverBorderWidth: 15,
-          pointRadius: 4,
-          data: this.data,
-        }]
-      },
-      options: gradientChartOptionsConfigurationWithTooltipRed
-    };
-    this.myChartData = new Chart(this.ctx, config);
+    // var config = {
+    //   type: 'line',
+    //   data: {
+    //     labels: chart_labels,
+    //     datasets: [{
+    //       label: "My First dataset",
+    //       fill: true,
+    //       backgroundColor: gradientStroke,
+    //       borderColor: '#ec250d',
+    //       borderWidth: 2,
+    //       borderDash: [],
+    //       borderDashOffset: 0.0,
+    //       pointBackgroundColor: '#ec250d',
+    //       pointBorderColor: 'rgba(255,255,255,0)',
+    //       pointHoverBackgroundColor: '#ec250d',
+    //       pointBorderWidth: 20,
+    //       pointHoverRadius: 4,
+    //       pointHoverBorderWidth: 15,
+    //       pointRadius: 4,
+    //       data: this.data,
+    //     }]
+    //   },
+    //   options: gradientChartOptionsConfigurationWithTooltipRed
+    // };
+    // this.myChartData = new Chart(this.ctx, config);
 
 //diabetes
 
@@ -570,6 +599,7 @@ this.ChartDefunciones = new Chart(this.ctx, {
   
   public checando1(query){
     var casos:number;
+    this.ResetValues();
     //var diabeticos=0;
     //var Data=[];
     this.ReadApi.LeerDatos(query)
@@ -599,10 +629,26 @@ this.ChartDefunciones = new Chart(this.ctx, {
             this.Basesde3(this.cardiovascular,faseset.facets);
           } else if(faseset.name=="embarazo"){
             this.Basesde3(this.Embarazos,faseset.facets);
-          } else if(faseset.name=="fecha_def"){
+          }else if(faseset.name=="sexo"){
+            for(let sexo of faseset.facets){
+              if(sexo.path=="HOMBRE"){
+                this.Sexo[0]=sexo.count;
+              } else {
+                this.Sexo[1]=sexo.count;
+              }
+            }}else if(faseset.name=="tipo_paciente"){
+              for(let sexo of faseset.facets){
+                if(sexo.path=="AMBULATORIO"){
+                  this.Pacientes[0]=sexo.count;
+                } else {
+                  this.Pacientes[1]=sexo.count;
+                }
+              }}else if(faseset.name=="fecha_def"){
             this.fallecidos=[];
             for(let fechas of faseset.facets){
+              if(fechas.name!="NA"){
                 this.fallecidos.push(<Fallecidos>{Fecha:this.parseDate(fechas.name),Confirmados:fechas.count})
+              }
                 //console.log(fechas.name);
             }
           } else if(faseset.name=="rango_edad"){
@@ -663,8 +709,9 @@ this.ChartDefunciones = new Chart(this.ctx, {
     this.myChartData.update();
   }
   public updateOptionsdiabetes() {
-    console.log(this.hipertensos);
+    //console.log(this.hipertensos);
     this.myChartDiabetes.update();
+    console.log(this.hipertensos);
     this.myChartHipertensos.update();
     this.myChartEpoc.update();
     this.myChartAsma.update();
@@ -672,7 +719,10 @@ this.ChartDefunciones = new Chart(this.ctx, {
     this.myChartTabaquismo.update();
     this.myChartRenal.update();
     this.myChartCardiovascular.update();
-
+    this.myChartSexo.update();
+    this.myChartPaciente.update();
+//    console.log(this.hipertensos.reduce((a, b) => a + b, 0));
+    
     this.ChartDefunciones.data.labels=this.fallecidos.map(t=>t.Fecha);
     this.ChartDefunciones.data.datasets[0].data=this.fallecidos.map(t=>t.Confirmados);
     this.ChartDefunciones.update();
@@ -680,6 +730,7 @@ this.ChartDefunciones = new Chart(this.ctx, {
     this.MyChartRangoEdades.data.datasets[0].data=this.Rangos.map(t=>t.Casos);
     this.MyChartRangoEdades.update();
     this.myChartEmbarazo.update();
+    
     
   }
   public parseDate(input,EsFecha=true) {
@@ -772,4 +823,58 @@ public FiltrarRangos(opcion,valor,numero){
   //console.log(this.RangosBool);
   console.log(opcion.map());
 }
+public ChangeGenero(opcion,valor,numero){
+  if(this.GenerosBool[0] && this.GenerosBool[1] || !valor ){
+    this.Querys[11]='&refine.sexo='+opcion
+    for(var i = 0; i < 2; i++){
+      this.GenerosBool[i]=false;
+    }
+    this.GenerosBool[numero]=true;
+  } else {
+    this.Querys[11]=''
+    for(var i = 0; i < 2; i++){
+      this.GenerosBool[i]=true;
+    }
+  }
+  this.checando1(this.UnirQuerys(this.Querys));
+  console.log(opcion.map());
+}
+
+public changeFiltros(opcion,valor,numero,numquery,refine,booleanos){
+  if(booleanos[0] && booleanos[1] || !valor ){
+    this.Querys[numquery]='&refine.'+refine+'='+opcion
+    for(var i = 0; i < 2; i++){
+      booleanos[i]=false;
+    }
+    booleanos[numero]=true;
+  } else {
+    this.Querys[numquery]=''
+    for(var i = 0; i < 2; i++){
+      booleanos[i]=true;
+    }
+  }
+  this.checando1(this.UnirQuerys(this.Querys));
+  console.log(opcion.map());
+}
+
+public ResetValues(){
+this.ValorACero(this.diabeticos);
+this.ValorACero(this.hipertensos);
+this.ValorACero(this.epoc);
+this.ValorACero(this.asma);
+this.ValorACero(this.obesidad);
+this.ValorACero(this.tabaquismo);
+this.ValorACero(this.renal_cronica);
+this.ValorACero(this.cardiovascular);
+this.ValorACero(this.Embarazos);
+this.ValorACero(this.Sexo);
+this.ValorACero(this.Pacientes);
+
+}
+public ValorACero(valores){
+  for(var i=0;i<valores.length;i++){
+    valores[i]=0;
+  }
+}
+
 }
